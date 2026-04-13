@@ -1,4 +1,4 @@
-name: CI - Preview en Vercel
+name: CI - Preview en Surge.sh
 
 on:
   pull_request_target:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   deploy-preview:
-    name: Desplegar preview en Vercel
+    name: Desplegar preview en Surge.sh
     runs-on: ubuntu-latest
 
     steps:
@@ -30,31 +30,21 @@ jobs:
       - name: Instalar dependencias
         run: npm install
 
-      - name: Instalar Vercel CLI
-        run: npm install -g vercel@latest
-
       - name: Construir el sitio con Eleventy
         run: npm run build
 
-      - name: Obtener configuración de Vercel
-        run: |
-          vercel pull --yes \
-            --environment=preview \
-            --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      - name: Instalar Surge CLI
+        run: npm install -g surge
 
-      - name: Desplegar preview en Vercel
+      - name: Desplegar preview en Surge.sh
         id: deploy
-        run: |
-          PREVIEW_URL=$(vercel deploy --prebuilt \
-            --token=${{ secrets.VERCEL_TOKEN }})
-          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
-          echo "Preview URL: $PREVIEW_URL"
         env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          DOMAIN="git-github-utp-pr-${PR_NUMBER}.surge.sh"
+          surge _site "$DOMAIN" --token "$SURGE_TOKEN"
+          echo "preview_url=https://$DOMAIN" >> $GITHUB_OUTPUT
 
       - name: Buscar comentario de preview existente
         id: find-comment
@@ -62,7 +52,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes: 'Preview de Vercel'
+          body-includes: 'Preview del Taller'
 
       - name: Publicar o actualizar comentario con el preview
         uses: peter-evans/create-or-update-comment@v4
@@ -71,7 +61,7 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           edit-mode: replace
           body: |
-            ## 🚀 Preview de Vercel
+            ## 🚀 Preview del Taller
 
             Tu tarjeta de perfil está lista para revisión:
 

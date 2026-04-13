@@ -49,11 +49,12 @@ Git-GitHub-Workshop-UTP/
 ### Configuración inicial
 
 1. Crea el repositorio en GitHub (o usa este como plantilla)
-2. Vincula el proyecto a Vercel: `vercel link`
-3. Agrega los siguientes secrets en la configuración del repositorio:
-   - `VERCEL_TOKEN` — Token de API de Vercel
+2. Vincula el proyecto a Vercel para producción: `vercel link`
+3. Agrega los siguientes secrets en **Settings → Secrets → Actions** del repositorio:
+   - `VERCEL_TOKEN` — Token de API de Vercel (para despliegue de producción)
    - `VERCEL_ORG_ID` — ID de tu organización en Vercel
    - `VERCEL_PROJECT_ID` — ID del proyecto en Vercel
+   - `SURGE_TOKEN` — Token de Surge.sh para previews de PRs (obtenerlo con `surge token`)
 
 ### Flujo del ejercicio
 

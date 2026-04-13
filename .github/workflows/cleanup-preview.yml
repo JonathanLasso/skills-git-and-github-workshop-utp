@@ -1,0 +1,35 @@
+name: CI - Limpiar Preview
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types: [closed]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  cleanup:
+    name: Eliminar preview de Surge.sh
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Instalar Surge CLI
+        run: npm install -g surge
+
+      - name: Eliminar preview
+        env:
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          DOMAIN="git-github-utp-pr-${PR_NUMBER}.surge.sh"
+          surge teardown "$DOMAIN" --token "$SURGE_TOKEN"
+          echo "Preview eliminado: https://$DOMAIN"
+
+      - name: Comentar que el preview fue eliminado
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            🗑️ El preview de Surge.sh fue eliminado al cerrar este PR.
